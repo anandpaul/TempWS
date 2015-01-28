@@ -87,7 +87,7 @@ public class FetchDataDAO extends BaseDAO {
 				requestBean.setBrigade(bBean);
 
 				if (mtmMaterial) {
-					requestBean.setMeasurement(fetchMeasurement(con, memberNo));
+					requestBean.setMeasurement(fetchMeasurement(con, requestBean.getRequestId()));
 				}
 			}
 
@@ -101,19 +101,19 @@ public class FetchDataDAO extends BaseDAO {
 	}
 
 	/**
-	 * @param memberNo
+	 * @param requestId
 	 * @return
 	 * @throws CFAException
 	 */
 	private MeasurementRequestBean fetchMeasurement(Connection con,
-			String memberNo) throws CFAException {
+			String requestId) throws CFAException {
 		MeasurementRequestBean bean = new MeasurementRequestBean();
 		ResultSet rs = null;
 		PreparedStatement stmt = null;
 		try {
 			stmt = con
 					.prepareStatement(ApplicationConstants.FETCH_MEASUREMENT_DATA);
-			stmt.setString(1, memberNo);
+			stmt.setString(1, requestId);
 			rs = stmt.executeQuery();
 			while (rs.next()) {
 				bean.setChestOrBust_A(rs.getString("chest_a"));
@@ -129,6 +129,7 @@ public class FetchDataDAO extends BaseDAO {
 				bean.setFrontRise_K(rs.getString("front_rise_k"));
 				bean.setBackRise_L(rs.getString("back_rise_l"));
 				bean.setThigh_M(rs.getString("thigh_m"));
+				bean.setShOrderNo(rs.getString("Measurement_Form_No"));
 			}
 		} catch (SQLException e) {
 			throw new CFAException(CFAConstants.ERROR_CODE_001,
@@ -241,7 +242,7 @@ public class FetchDataDAO extends BaseDAO {
 
 			con = getConnection();
 			stmt = con
-					.prepareStatement("SELECT distinct([TransactionID]),TransactionDate,SerialNumber,ActivityName,Site,SiteType,AssetSupplierCode,RFID,CurrentQueue,GarmentID,Current_Disposition,updation_date FROM [CFA_PPCSE_DEV].[ppcseSchema].[T_LAUNDRY_REQ]");
+					.prepareStatement("SELECT distinct([TransactionID]),TransactionDate,SerialNumber,ActivityName,Site,SiteType,AssetSupplierCode,RFID,CurrentQueue,GarmentID,Current_Disposition,updation_date FROM [ppcseSchema].[T_LAUNDRY_REQ]");
 			rs = stmt.executeQuery();
 			if (rs.getFetchSize() > 0) {
 				assetIDDetailsMap = PPCSEUtility.fetchAssetDetails(con);

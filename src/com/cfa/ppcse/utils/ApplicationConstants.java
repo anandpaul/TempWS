@@ -31,5 +31,5 @@ public class ApplicationConstants {
 			});
 	public static final String FETCH_SIZES_BY_GROUP_NAME = "select * from ppcseSchema.M_CATALOGUE_ITEMS where product_group = ? and description like ? and catalogue_id=(SELECT [catalogue_id] FROM [ppcseSchema].[M_CATALOGUES] where description = 'ACTIVE') order by material_id";
 
-	public static final String FETCH_MEASUREMENT_DATA = "select * from ppcseSchema.T_MEASUREMENT_REQUEST_ITEM where memberNumber=?";
+	public static final String FETCH_MEASUREMENT_DATA = "select * from ppcseSchema.T_MEASUREMENT_REQUEST_ITEM where request_Id=?";
 }
