@@ -86,9 +86,10 @@ public class FetchDataDAO extends BaseDAO {
 
 				requestBean.setBrigade(bBean);
 
-				if (mtmMaterial) {
-					requestBean.setMeasurement(fetchMeasurement(con, requestBean.getRequestId()));
-				}
+				// if (mtmMaterial) {
+				requestBean.setMeasurement(fetchMeasurement(con,
+						requestBean.getRequestId(), mtmMaterial));
+				// }
 			}
 
 		} catch (SQLException e) {
@@ -106,7 +107,7 @@ public class FetchDataDAO extends BaseDAO {
 	 * @throws CFAException
 	 */
 	private MeasurementRequestBean fetchMeasurement(Connection con,
-			String requestId) throws CFAException {
+			String requestId, boolean mtmMaterial) throws CFAException {
 		MeasurementRequestBean bean = new MeasurementRequestBean();
 		ResultSet rs = null;
 		PreparedStatement stmt = null;
@@ -116,19 +117,22 @@ public class FetchDataDAO extends BaseDAO {
 			stmt.setString(1, requestId);
 			rs = stmt.executeQuery();
 			while (rs.next()) {
-				bean.setChestOrBust_A(rs.getString("chest_a"));
-				bean.setWaist_B(rs.getString("waist_b"));
-				bean.setSeatOrHips_C(rs.getString("seat_c"));
-				bean.setSleeveLength_D(rs.getString("sleeve_length_d"));
-				bean.setAcrossBack_E(rs.getString("across_back_e"));
-				bean.setBackLength_F(rs.getString("back_length_f"));
-				bean.setNeck_G(rs.getString("neck_g"));
-				bean.setInLeg_H(rs.getString("inleg_h"));
-				bean.setOutLeg_I(rs.getString("outleg_i"));
-				bean.setKneePadPosition_J(rs.getString("knee_pad_position_j"));
-				bean.setFrontRise_K(rs.getString("front_rise_k"));
-				bean.setBackRise_L(rs.getString("back_rise_l"));
-				bean.setThigh_M(rs.getString("thigh_m"));
+				if (mtmMaterial) {
+					bean.setChestOrBust_A(rs.getString("chest_a"));
+					bean.setWaist_B(rs.getString("waist_b"));
+					bean.setSeatOrHips_C(rs.getString("seat_c"));
+					bean.setSleeveLength_D(rs.getString("sleeve_length_d"));
+					bean.setAcrossBack_E(rs.getString("across_back_e"));
+					bean.setBackLength_F(rs.getString("back_length_f"));
+					bean.setNeck_G(rs.getString("neck_g"));
+					bean.setInLeg_H(rs.getString("inleg_h"));
+					bean.setOutLeg_I(rs.getString("outleg_i"));
+					bean.setKneePadPosition_J(rs
+							.getString("knee_pad_position_j"));
+					bean.setFrontRise_K(rs.getString("front_rise_k"));
+					bean.setBackRise_L(rs.getString("back_rise_l"));
+					bean.setThigh_M(rs.getString("thigh_m"));
+				}
 				bean.setShOrderNo(rs.getString("Measurement_Form_No"));
 			}
 		} catch (SQLException e) {
