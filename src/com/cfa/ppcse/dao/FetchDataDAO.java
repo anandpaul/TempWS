@@ -56,11 +56,10 @@ public class FetchDataDAO extends BaseDAO {
 			stmt = con.prepareStatement(sql);
 			stmt.setString(1, "Ordered".toUpperCase());
 			boolean mtmMaterial = false;
-			for (rs = stmt.executeQuery(); rs.next(); ordersList
-					.add(requestBean)) {
+			for (rs = stmt.executeQuery(); rs.next(); ordersList.add(requestBean)) {
 				requestBean = new RequestBean();
 				String memberNo = rs.getString("member_number");
-				System.out.println("Role - " + rs.getString("role"));
+				// System.out.println("Role - " + rs.getString("role"));
 				requestBean.setBrigadeName(rs.getString("bName"));
 				requestBean.setBrigadeNumber(rs.getInt("bNum"));
 				requestBean.setSurname(rs.getString("surname"));
@@ -70,6 +69,7 @@ public class FetchDataDAO extends BaseDAO {
 				requestBean.setReason(rs.getString("reason"));
 				requestBean.setComment(rs.getString("comment"));
 				requestBean.setRoleType(rs.getString("role"));
+				requestBean.setOrderedDate(rs.getDate("updation_date"));
 				mtmMaterial = fetchItemList(con, requestBean);
 
 				BrigadeBean bBean = new BrigadeBean();
@@ -87,14 +87,12 @@ public class FetchDataDAO extends BaseDAO {
 				requestBean.setBrigade(bBean);
 
 				// if (mtmMaterial) {
-				requestBean.setMeasurement(fetchMeasurement(con,
-						requestBean.getRequestId(), mtmMaterial));
+				requestBean.setMeasurement(fetchMeasurement(con, requestBean.getRequestId(), mtmMaterial));
 				// }
 			}
 
 		} catch (SQLException e) {
-			throw new CFAException(CFAConstants.ERROR_CODE_001,
-					CFAConstants.E001_DB_FETCH_ERROR, e);
+			throw new CFAException(CFAConstants.ERROR_CODE_001, CFAConstants.E001_DB_FETCH_ERROR, e);
 		} finally {
 			closeConnection(rs, stmt, con);
 		}
@@ -106,14 +104,12 @@ public class FetchDataDAO extends BaseDAO {
 	 * @return
 	 * @throws CFAException
 	 */
-	private MeasurementRequestBean fetchMeasurement(Connection con,
-			String requestId, boolean mtmMaterial) throws CFAException {
+	private MeasurementRequestBean fetchMeasurement(Connection con, String requestId, boolean mtmMaterial) throws CFAException {
 		MeasurementRequestBean bean = new MeasurementRequestBean();
 		ResultSet rs = null;
 		PreparedStatement stmt = null;
 		try {
-			stmt = con
-					.prepareStatement(ApplicationConstants.FETCH_MEASUREMENT_DATA);
+			stmt = con.prepareStatement(ApplicationConstants.FETCH_MEASUREMENT_DATA);
 			stmt.setString(1, requestId);
 			rs = stmt.executeQuery();
 			while (rs.next()) {
@@ -127,8 +123,7 @@ public class FetchDataDAO extends BaseDAO {
 					bean.setNeck_G(rs.getString("neck_g"));
 					bean.setInLeg_H(rs.getString("inleg_h"));
 					bean.setOutLeg_I(rs.getString("outleg_i"));
-					bean.setKneePadPosition_J(rs
-							.getString("knee_pad_position_j"));
+					bean.setKneePadPosition_J(rs.getString("knee_pad_position_j"));
 					bean.setFrontRise_K(rs.getString("front_rise_k"));
 					bean.setBackRise_L(rs.getString("back_rise_l"));
 					bean.setThigh_M(rs.getString("thigh_m"));
@@ -136,8 +131,7 @@ public class FetchDataDAO extends BaseDAO {
 				bean.setShOrderNo(rs.getString("Measurement_Form_No"));
 			}
 		} catch (SQLException e) {
-			throw new CFAException(CFAConstants.ERROR_CODE_001,
-					CFAConstants.E001_DB_FETCH_ERROR, e);
+			throw new CFAException(CFAConstants.ERROR_CODE_001, CFAConstants.E001_DB_FETCH_ERROR, e);
 		} finally {
 			closeResources(rs, stmt);
 		}
@@ -151,42 +145,34 @@ public class FetchDataDAO extends BaseDAO {
 	 * @return
 	 * @throws CFAException
 	 */
-	private boolean fetchItemList(Connection con, RequestBean request)
-			throws CFAException {
+	private boolean fetchItemList(Connection con, RequestBean request) throws CFAException {
 		PreparedStatement stmt = null;
 		boolean mtmMaterial = false;
 		ResultSet resultSet = null;
 		List<ItemBean> itemBeanList = new ArrayList<ItemBean>();
 		try {
-			stmt = con
-					.prepareStatement("select * from ppcseSchema.T_ORDER_ITEM where request_id =?");
+			stmt = con.prepareStatement("select * from ppcseSchema.T_ORDER_ITEM where request_id =?");
 			stmt.setString(1, request.getRequestId());
 			ItemBean itemBean;
-			for (resultSet = stmt.executeQuery(); resultSet.next(); itemBeanList
-					.add(itemBean)) {
+			for (resultSet = stmt.executeQuery(); resultSet.next(); itemBeanList.add(itemBean)) {
 				itemBean = new ItemBean();
 				itemBean.setRequestId(resultSet.getString("request_id"));
-				itemBean.setItemRequestId(resultSet
-						.getString("item_request_id"));
+				itemBean.setItemRequestId(resultSet.getString("item_request_id"));
 				itemBean.setProductID(resultSet.getString("product_id"));
-				itemBean.setAlteration(resultSet
-						.getString("alteration_details"));
+				itemBean.setAlteration(resultSet.getString("alteration_details"));
 				itemBean.setItemType(resultSet.getString("item_type"));
-				itemBean.setQuantity(Integer.valueOf(resultSet
-						.getInt("quantity")));
+				itemBean.setQuantity(Integer.valueOf(resultSet.getInt("quantity")));
 				String size = resultSet.getString("size");
 				if (null != size) {
 					if (size.endsWith("MTM")) {
 						mtmMaterial = true;
 					}
-					itemBean.setVendorMaterialCode(getMaterialCode(con, size,
-							itemBean.getProductID()));
+					itemBean.setVendorMaterialCode(getMaterialCode(con, size, itemBean.getProductID()));
 				}
 			}
 			stmt.close();
 		} catch (SQLException e) {
-			throw new CFAException(CFAConstants.ERROR_CODE_001,
-					CFAConstants.E001_DB_FETCH_ERROR, e);
+			throw new CFAException(CFAConstants.ERROR_CODE_001, CFAConstants.E001_DB_FETCH_ERROR, e);
 		} finally {
 			closeResources(resultSet, stmt);
 		}
@@ -201,25 +187,21 @@ public class FetchDataDAO extends BaseDAO {
 	 * @return
 	 * @throws CFAException
 	 */
-	private String getMaterialCode(Connection con, String size, String productID)
-			throws CFAException {
+	private String getMaterialCode(Connection con, String size, String productID) throws CFAException {
 
 		PreparedStatement stmt = null;
 		ResultSet resultSet = null;
 		String vendorMaterialCode = null;
 		try {
-			stmt = con
-					.prepareStatement("select vendor_material_code from ppcseSchema.M_CATALOGUE_ITEMS where material_id=? and product_group =?");
+			stmt = con.prepareStatement("select vendor_material_code from ppcseSchema.M_CATALOGUE_ITEMS where material_id=? and product_group =?");
 			stmt.setString(1, size);
 			stmt.setString(2, productID);
 			resultSet = stmt.executeQuery();
 			while (resultSet.next()) {
-				vendorMaterialCode = resultSet
-						.getString("vendor_material_code");
+				vendorMaterialCode = resultSet.getString("vendor_material_code");
 			}
 		} catch (SQLException e) {
-			throw new CFAException(CFAConstants.ERROR_CODE_001,
-					CFAConstants.E001_DB_FETCH_ERROR, e);
+			throw new CFAException(CFAConstants.ERROR_CODE_001, CFAConstants.E001_DB_FETCH_ERROR, e);
 		} finally {
 			closeResources(resultSet, stmt);
 		}
@@ -230,8 +212,7 @@ public class FetchDataDAO extends BaseDAO {
 	 * @return
 	 * @throws CFAException
 	 */
-	public List<AllocatedAssetsBean> getAllocatedAssetsDetailsLogicData()
-			throws CFAException {
+	public List<AllocatedAssetsBean> getAllocatedAssetsDetailsLogicData() throws CFAException {
 
 		Connection con = null;
 		PreparedStatement stmt = null;
@@ -252,31 +233,27 @@ public class FetchDataDAO extends BaseDAO {
 				assetIDDetailsMap = PPCSEUtility.fetchAssetDetails(con);
 				fireFighterMap = PPCSEUtility.fetchFireFighterDetails(con);
 			}
-			for (; rs.next(); assetsCreatedOrUpdatedTodayList
-					.add(allocatedAssetsBean)) {
+			for (; rs.next(); assetsCreatedOrUpdatedTodayList.add(allocatedAssetsBean)) {
 				assetsList = new ArrayList<Assets>();
 				allocatedAssetsBean = new AllocatedAssetsBean();
 				Assets asset = new Assets();
 				asset.setCurrentDisposition(rs.getString("Current_Disposition"));
 				asset.setActivityID(rs.getString("ActivityName"));
 				asset.setMaterialId(rs.getString("AssetSupplierCode"));
-				asset.setAssetID((String) assetIDDetailsMap.get(rs
-						.getString("SerialNumber")));
+				asset.setAssetID((String) assetIDDetailsMap.get(rs.getString("SerialNumber")));
 				if (rs.getString("AssetSupplierCode").contains("INNER")) {
 					asset.setRfidINNER(rs.getString("RFID"));
 				} else {
 					asset.setRfidOUTER(rs.getString("RFID"));
 				}
-				allocatedAssetsBean.setMemberId((String) fireFighterMap
-						.get(asset.getAssetID()));
+				allocatedAssetsBean.setMemberId((String) fireFighterMap.get(asset.getAssetID()));
 				allocatedAssetsBean.setBrigade(rs.getString("Site"));
 				assetsList.add(asset);
 				allocatedAssetsBean.setAssetsList(assetsList);
 
 			}
 		} catch (SQLException e) {
-			throw new CFAException(CFAConstants.ERROR_CODE_001,
-					CFAConstants.E001_DB_FETCH_ERROR, e);
+			throw new CFAException(CFAConstants.ERROR_CODE_001, CFAConstants.E001_DB_FETCH_ERROR, e);
 		} finally {
 			closeConnection(rs, stmt, con);
 		}

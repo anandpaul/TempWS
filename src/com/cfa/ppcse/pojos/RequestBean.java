@@ -1,5 +1,6 @@
 package com.cfa.ppcse.pojos;
 
+import java.util.Date;
 import java.util.List;
 
 public class RequestBean {
@@ -16,10 +17,26 @@ public class RequestBean {
 	private String status;
 	private String comment;
 	private String roleType;
+	private Date orderedDate;
 	private BrigadeBean brigade;
 	private MeasurementRequestBean measurement;
 
 	private List<ItemBean> itemBeanList;
+
+	/**
+	 * @return the orderedDate
+	 */
+	public Date getOrderedDate() {
+		return orderedDate;
+	}
+
+	/**
+	 * @param orderedDate
+	 *            the orderedDate to set
+	 */
+	public void setOrderedDate(Date orderedDate) {
+		this.orderedDate = orderedDate;
+	}
 
 	/**
 	 * @return the measurement
