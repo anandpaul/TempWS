@@ -1,6 +1,5 @@
 package com.cfa.ppcse.pojos;
 
-
 public class ItemBean {
 	private String requestId;
 	private String itemRequestId;
@@ -9,6 +8,22 @@ public class ItemBean {
 	private String alteration;
 	private String vendorMaterialCode;
 	private String itemType;
+	private boolean altered;
+
+	/**
+	 * @return the altered
+	 */
+	public boolean isAltered() {
+		return altered;
+	}
+
+	/**
+	 * @param altered
+	 *            the altered to set
+	 */
+	public void setAltered(boolean altered) {
+		this.altered = altered;
+	}
 
 	/**
 	 * @return the requestId
@@ -40,8 +55,6 @@ public class ItemBean {
 		this.itemRequestId = itemRequestId;
 	}
 
-	
-
 	public String getProductID() {
 		return productID;
 	}
@@ -49,8 +62,6 @@ public class ItemBean {
 	public void setProductID(String productID) {
 		this.productID = productID;
 	}
-
-	
 
 	public Integer getQuantity() {
 		return quantity;
@@ -60,7 +71,6 @@ public class ItemBean {
 		this.quantity = quantity;
 	}
 
-	
 	public String getAlteration() {
 		return alteration;
 	}
@@ -68,7 +78,6 @@ public class ItemBean {
 	public void setAlteration(String alteration) {
 		this.alteration = alteration;
 	}
-
 
 	public String getVendorMaterialCode() {
 		return vendorMaterialCode;

@@ -20,6 +20,7 @@ import com.cfa.ppcse.pojos.RequestBean;
 import com.cfa.ppcse.utils.ApplicationConstants;
 import com.cfa.ppcse.utils.CFAConstants;
 import com.cfa.ppcse.utils.CFAException;
+import com.cfa.ppcse.utils.CfaQueries;
 import com.cfa.ppcse.utils.PPCSEUtility;
 
 /**
@@ -34,6 +35,19 @@ public class FetchDataDAO extends BaseDAO {
 	 * @throws CFAException
 	 */
 	public List<RequestBean> getOrderedRequest() throws CFAException {
+
+		List<RequestBean> ordersList = new ArrayList<RequestBean>();
+		ordersList.addAll(processResultSet(CfaQueries.FETCH_BRIGADE_APPROVED_REQUESTS));
+		ordersList.addAll(processResultSet(CfaQueries.FETCH_DISTRICT_ADDRESS_REQUESTS));
+		return ordersList;
+	}
+
+	/**
+	 * @param sql
+	 * @return
+	 * @throws CFAException
+	 */
+	private List<RequestBean> processResultSet(String sql) throws CFAException {
 		Connection con = null;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
@@ -48,9 +62,6 @@ public class FetchDataDAO extends BaseDAO {
 			 * ); stmt.setString(1, "Ordered"); stmt.setDate(2, new
 			 * Date(System.currentTimeMillis()));
 			 */
-			String sql = "select b.Brigade_number bNum,b.Brigade_name bName,b.Name1 name1,b.Name2 name2,b.Street_Number stNum,b.Street_Name1 stName1,"
-					+ "b.Street_Name2 stName2,b.Suburb suburb,b.State state,b.Post_Code postCode,r.role_type role, r.* from ppcseSchema.T_ORDER_REQUEST r,ppcseSchema.M_BRIGADE_ADDRESS b"
-					+ " where UPPER(r.status)=? and r.brigade=b.Brigade_Number";
 			// stmt =
 			// con.prepareStatement("select * from ppcseSchema.T_ORDER_REQUEST where status in (?)");
 			stmt = con.prepareStatement(sql);
@@ -70,7 +81,8 @@ public class FetchDataDAO extends BaseDAO {
 				requestBean.setComment(rs.getString("comment"));
 				requestBean.setRoleType(rs.getString("role"));
 				requestBean.setOrderedDate(rs.getDate("updation_date"));
-				mtmMaterial = fetchItemList(con, requestBean);
+				boolean newRecruit = rs.getBoolean("newRecruit");
+				mtmMaterial = fetchItemList(con, requestBean, newRecruit);
 
 				BrigadeBean bBean = new BrigadeBean();
 				bBean.setId(rs.getString("bNum"));
@@ -145,7 +157,7 @@ public class FetchDataDAO extends BaseDAO {
 	 * @return
 	 * @throws CFAException
 	 */
-	private boolean fetchItemList(Connection con, RequestBean request) throws CFAException {
+	private boolean fetchItemList(Connection con, RequestBean request, boolean newRecruit) throws CFAException {
 		PreparedStatement stmt = null;
 		boolean mtmMaterial = false;
 		ResultSet resultSet = null;
@@ -154,12 +166,15 @@ public class FetchDataDAO extends BaseDAO {
 			stmt = con.prepareStatement("select * from ppcseSchema.T_ORDER_ITEM where request_id =?");
 			stmt.setString(1, request.getRequestId());
 			ItemBean itemBean;
-			for (resultSet = stmt.executeQuery(); resultSet.next(); itemBeanList.add(itemBean)) {
+			resultSet = stmt.executeQuery();
+			while (resultSet.next()) {
 				itemBean = new ItemBean();
+				String productId = resultSet.getString("product_id");
 				itemBean.setRequestId(resultSet.getString("request_id"));
 				itemBean.setItemRequestId(resultSet.getString("item_request_id"));
-				itemBean.setProductID(resultSet.getString("product_id"));
+				itemBean.setProductID(productId);
 				itemBean.setAlteration(resultSet.getString("alteration_details"));
+				itemBean.setAltered(resultSet.getBoolean("altered"));
 				itemBean.setItemType(resultSet.getString("item_type"));
 				itemBean.setQuantity(Integer.valueOf(resultSet.getInt("quantity")));
 				String size = resultSet.getString("size");
@@ -169,6 +184,15 @@ public class FetchDataDAO extends BaseDAO {
 					}
 					itemBean.setVendorMaterialCode(getMaterialCode(con, size, itemBean.getProductID()));
 				}
+				if (newRecruit) {
+					if (!("SHORTS".equalsIgnoreCase(productId) || "KIT BAG".equalsIgnoreCase(productId))) {
+						itemBeanList.add(itemBean);
+					}
+
+				} else {
+					itemBeanList.add(itemBean);
+				}
+
 			}
 			stmt.close();
 		} catch (SQLException e) {
