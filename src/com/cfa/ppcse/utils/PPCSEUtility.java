@@ -3,6 +3,7 @@ package com.cfa.ppcse.utils;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -56,8 +57,6 @@ public class PPCSEUtility {
 		return new java.sql.Date(date.getTime());
 	}
 
-	
-
 	/**
 	 * 
 	 * @param con
@@ -67,10 +66,9 @@ public class PPCSEUtility {
 		Map<String, String> activitiesMap = new HashMap<String, String>();
 		PreparedStatement stmt = null;
 		try {
-			stmt = con
-					.prepareStatement("select act.ID ,act.Name from [CFA_PPCSE_DEV].[ppcseSchema].[Activities] act where act.ID in (SELECT assetLogs.ActivityID"
-							+ " FROM [CFA_PPCSE_DEV].[ppcseSchema].[AssetFFAllocations] alloc,[CFA_PPCSE_DEV].[ppcseSchema].[AssetActivityLogs] assetLogs"
-							+ "  where assetLogs.[AssetID] =alloc.AssetID)");
+			stmt = con.prepareStatement("select act.ID ,act.Name from [CFA_PPCSE_DEV].[ppcseSchema].[Activities] act where act.ID in (SELECT assetLogs.ActivityID"
+					+ " FROM [CFA_PPCSE_DEV].[ppcseSchema].[AssetFFAllocations] alloc,[CFA_PPCSE_DEV].[ppcseSchema].[AssetActivityLogs] assetLogs"
+					+ "  where assetLogs.[AssetID] =alloc.AssetID)");
 			ResultSet rs = stmt.executeQuery();
 			while (rs.next()) {
 				activitiesMap.put(rs.getString("ID"), rs.getString("Name"));
@@ -90,10 +88,9 @@ public class PPCSEUtility {
 		Map<String, String> siteMap = new HashMap<String, String>();
 		PreparedStatement stmt = null;
 		try {
-			stmt = con
-					.prepareStatement("select sites.ID,sites.SiteCode from [CFA_PPCSE_DEV].[ppcseSchema].[Sites] sites where sites.ID in (SELECT assetLogs.SiteID"
-							+ "  FROM [CFA_PPCSE_DEV].[ppcseSchema].[AssetFFAllocations] alloc,[CFA_PPCSE_DEV].[ppcseSchema].[AssetActivityLogs] assetLogs"
-							+ "  where assetLogs.[AssetID] =alloc.AssetID)");
+			stmt = con.prepareStatement("select sites.ID,sites.SiteCode from [CFA_PPCSE_DEV].[ppcseSchema].[Sites] sites where sites.ID in (SELECT assetLogs.SiteID"
+					+ "  FROM [CFA_PPCSE_DEV].[ppcseSchema].[AssetFFAllocations] alloc,[CFA_PPCSE_DEV].[ppcseSchema].[AssetActivityLogs] assetLogs"
+					+ "  where assetLogs.[AssetID] =alloc.AssetID)");
 			ResultSet rs = stmt.executeQuery();
 			while (rs.next()) {
 				siteMap.put(rs.getString("ID"), rs.getString("SiteCode"));
@@ -144,4 +141,36 @@ public class PPCSEUtility {
 		return assetMap;
 	}
 
+	/**
+	 * This method places ? as many number of times
+	 * 
+	 * @param length
+	 * @return
+	 */
+	public static String preparePlaceHolders(int length) {
+		StringBuilder builder = new StringBuilder();
+		for (int i = 0; i < length;) {
+			builder.append("?");
+			if (++i < length) {
+				builder.append(",");
+			}
+		}
+		System.out.println("Built - " + builder.toString());
+		return builder.toString();
+	}
+
+	/**
+	 * This method sets the values for the number of ?
+	 * 
+	 * @param preparedStatement
+	 * @param values
+	 * @throws SQLException
+	 */
+	public static void setValues(PreparedStatement preparedStatement, Object... values) throws SQLException {
+		int j = 0;
+		for (int i = 1; i <= values.length; i++) {
+			preparedStatement.setObject(i + 1, values[j]);
+			j++;
+		}
+	}
 }

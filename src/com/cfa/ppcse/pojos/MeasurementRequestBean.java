@@ -3,11 +3,8 @@ package com.cfa.ppcse.pojos;
 import java.util.Date;
 
 public class MeasurementRequestBean {
-	
-	
+
 	private String measurementId;
-	private String requestId;
-	private String status;
 	private String shOrderNo;
 	private String requestorId;
 	private String createdBy;
@@ -37,36 +34,6 @@ public class MeasurementRequestBean {
 	private String frontRise_K;
 	private String backRise_L;
 	private String thigh_M;
-
-	/**
-	 * @return the requestId
-	 */
-	public String getRequestId() {
-		return requestId;
-	}
-
-	/**
-	 * @param requestID
-	 *            the requestID to set
-	 */
-	public void setRequestId(String requestId) {
-		this.requestId = requestId;
-	}
-
-	/**
-	 * @return the status
-	 */
-	public String getStatus() {
-		return status;
-	}
-
-	/**
-	 * @param status
-	 *            the status to set
-	 */
-	public void setStatus(String status) {
-		this.status = status;
-	}
 
 	/**
 	 * @return the requestorId
@@ -376,7 +343,8 @@ public class MeasurementRequestBean {
 	}
 
 	/**
-	 * @param file the file to set
+	 * @param file
+	 *            the file to set
 	 */
 	public void setFile(String file) {
 		this.file = file;

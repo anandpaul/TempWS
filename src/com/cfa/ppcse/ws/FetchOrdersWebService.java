@@ -1,6 +1,7 @@
 package com.cfa.ppcse.ws;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.jws.WebMethod;
@@ -10,6 +11,7 @@ import org.apache.log4j.Logger;
 import com.cfa.ppcse.business.FetchDataBusiness;
 import com.cfa.ppcse.pojos.AllocatedAssetsBean;
 import com.cfa.ppcse.pojos.RequestBean;
+import com.cfa.ppcse.pojos.UpdateRequestBean;
 import com.cfa.ppcse.utils.CFAException;
 
 public class FetchOrdersWebService {
@@ -31,19 +33,35 @@ public class FetchOrdersWebService {
 	}
 
 	/**
+	 * This method updates the status
+	 * 
+	 * @param reqList
+	 * @throws CFAException
+	 */
+	@WebMethod
+	public static String updateStatus(UpdateRequestBean[] arr) throws CFAException {
+		LOG.info("Inside the Update status of processed request");
+		FetchDataBusiness business = new FetchDataBusiness();
+
+		if (arr != null && arr.length > 0) {
+			List<UpdateRequestBean> reqList = Arrays.asList(arr);
+			business.updateReqStatus(reqList);
+		}
+		return "success";
+	}
+
+	/**
 	 * 
 	 * @return
 	 * @throws CFAException
 	 * 
 	 */
 	@WebMethod
-	public static List<AllocatedAssetsBean> getAllocatedAssetsDetailsLogicData()
-			throws CFAException {
+	public static List<AllocatedAssetsBean> getAllocatedAssetsDetailsLogicData() throws CFAException {
 
 		List<AllocatedAssetsBean> assetsCreatedOrUpdatedTodayList = new ArrayList<AllocatedAssetsBean>();
 		FetchDataBusiness business = new FetchDataBusiness();
 		business.getAllocatedAssetsDetailsLogicData();
 		return assetsCreatedOrUpdatedTodayList;
 	}
-
 }

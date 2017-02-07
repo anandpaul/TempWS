@@ -10,6 +10,7 @@ import org.apache.log4j.Logger;
 import com.cfa.ppcse.dao.FetchDataDAO;
 import com.cfa.ppcse.pojos.AllocatedAssetsBean;
 import com.cfa.ppcse.pojos.RequestBean;
+import com.cfa.ppcse.pojos.UpdateRequestBean;
 import com.cfa.ppcse.utils.CFAException;
 
 /**
@@ -33,11 +34,21 @@ public class FetchDataBusiness {
 	}
 
 	/**
+	 * This method invokes to DAO method to update the status
+	 * 
+	 * @param reqList
+	 * @throws CFAException
+	 */
+	public boolean updateReqStatus(List<UpdateRequestBean> reqList) throws CFAException {
+		FetchDataDAO dataDAO = new FetchDataDAO();
+		return dataDAO.updateReqStatus(reqList);
+	}
+
+	/**
 	 * @return
 	 * @throws CFAException
 	 */
-	public List<AllocatedAssetsBean> getAllocatedAssetsDetailsLogicData()
-			throws CFAException {
+	public List<AllocatedAssetsBean> getAllocatedAssetsDetailsLogicData() throws CFAException {
 		List<AllocatedAssetsBean> beans = null;
 		FetchDataDAO dataDAO = new FetchDataDAO();
 		beans = dataDAO.getAllocatedAssetsDetailsLogicData();

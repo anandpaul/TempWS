@@ -4,6 +4,7 @@
 package com.cfa.ppcse.dao;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -11,12 +12,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+
 import com.cfa.ppcse.pojos.AllocatedAssetsBean;
 import com.cfa.ppcse.pojos.Assets;
 import com.cfa.ppcse.pojos.BrigadeBean;
 import com.cfa.ppcse.pojos.ItemBean;
 import com.cfa.ppcse.pojos.MeasurementRequestBean;
 import com.cfa.ppcse.pojos.RequestBean;
+import com.cfa.ppcse.pojos.UpdateRequestBean;
 import com.cfa.ppcse.utils.ApplicationConstants;
 import com.cfa.ppcse.utils.CFAConstants;
 import com.cfa.ppcse.utils.CFAException;
@@ -28,6 +32,9 @@ import com.cfa.ppcse.utils.PPCSEUtility;
  *
  */
 public class FetchDataDAO extends BaseDAO {
+
+	private static final Logger LOG = Logger.getLogger(FetchDataDAO.class);
+
 	/**
 	 * This method returns the Ordered requests to SAP
 	 * 
@@ -39,6 +46,7 @@ public class FetchDataDAO extends BaseDAO {
 		List<RequestBean> ordersList = new ArrayList<RequestBean>();
 		ordersList.addAll(processResultSet(CfaQueries.FETCH_BRIGADE_APPROVED_REQUESTS));
 		ordersList.addAll(processResultSet(CfaQueries.FETCH_DISTRICT_ADDRESS_REQUESTS));
+		LOG.info("List of orders returned - "+ordersList.size());
 		return ordersList;
 	}
 
@@ -65,7 +73,7 @@ public class FetchDataDAO extends BaseDAO {
 			// stmt =
 			// con.prepareStatement("select * from ppcseSchema.T_ORDER_REQUEST where status in (?)");
 			stmt = con.prepareStatement(sql);
-			stmt.setString(1, "Ordered".toUpperCase());
+			stmt.setString(1, ApplicationConstants.STATUS_ENDORSED);
 			boolean mtmMaterial = false;
 			for (rs = stmt.executeQuery(); rs.next(); ordersList.add(requestBean)) {
 				requestBean = new RequestBean();
@@ -80,7 +88,11 @@ public class FetchDataDAO extends BaseDAO {
 				requestBean.setReason(rs.getString("reason"));
 				requestBean.setComment(rs.getString("comment"));
 				requestBean.setRoleType(rs.getString("role"));
-				requestBean.setOrderedDate(rs.getDate("updation_date"));
+				System.out.println("rs.getDate(updation_date = " + rs.getString("updation_date") + ", eta - " + rs.getString("eta"));
+				 requestBean.setOrderedDate(rs.getDate("updation_date"));
+				requestBean.setPriority(rs.getString("priority"));
+				// requestBean.setEta(rs.getDate("eta"));
+
 				boolean newRecruit = rs.getBoolean("newRecruit");
 				mtmMaterial = fetchItemList(con, requestBean, newRecruit);
 
@@ -163,7 +175,7 @@ public class FetchDataDAO extends BaseDAO {
 		ResultSet resultSet = null;
 		List<ItemBean> itemBeanList = new ArrayList<ItemBean>();
 		try {
-			stmt = con.prepareStatement("select * from ppcseSchema.T_ORDER_ITEM where request_id =?");
+			stmt = con.prepareStatement("select * from ppcseSchema.T_ORDER_ITEM where quantity>0 AND request_id =?");
 			stmt.setString(1, request.getRequestId());
 			ItemBean itemBean;
 			resultSet = stmt.executeQuery();
@@ -233,6 +245,44 @@ public class FetchDataDAO extends BaseDAO {
 	}
 
 	/**
+	 * This method updates the status of all the successfully processed requests
+	 * 
+	 * @param reqList
+	 * @throws CFAException
+	 */
+	public boolean updateReqStatus(List<UpdateRequestBean> reqList) throws CFAException {
+		Connection con = null;
+		boolean success = true;
+		PreparedStatement stmt = null;
+		boolean commit = true;
+
+		con = getConnection();
+		try {
+			stmt = con.prepareStatement(CfaQueries.UPDATE_REQUEST_STATUS);
+
+			for (UpdateRequestBean rBean : reqList) {
+				LOG.info("req - " + rBean.getRequestId() + ", status - " + rBean.getStatus());
+				stmt.setString(1, rBean.getStatus());
+				stmt.setInt(2, rBean.getStatusCode());
+				stmt.setString(3, "SAP");
+				stmt.setDate(4, new Date(System.currentTimeMillis()));
+				stmt.setString(5, rBean.getRequestId());
+				stmt.addBatch();
+			}
+
+			stmt.executeBatch();
+			createStatusLog(con, reqList);
+		} catch (SQLException e) {
+			commit = false;
+			success = false;
+			throw new CFAException("Error occurred while update the status");
+		} finally {
+			closeConnection(null, stmt, con, commit);
+		}
+		return success;
+	}
+
+	/**
 	 * @return
 	 * @throws CFAException
 	 */
@@ -282,5 +332,60 @@ public class FetchDataDAO extends BaseDAO {
 			closeConnection(rs, stmt, con);
 		}
 		return assetsCreatedOrUpdatedTodayList;
+	}
+
+	/**
+	 * This method gets the status code for the given status
+	 * 
+	 * @param status
+	 * @return
+	 * @throws CFAException
+	 */
+	public int getStatusCode(Connection con, String status) throws CFAException {
+		int statusCode = 0;
+		PreparedStatement statement = null;
+		ResultSet resultSet = null;
+		try {
+			statement = con.prepareStatement(CfaQueries.FETCH_STATUS_CODE);
+			statement.setString(1, status.toUpperCase());
+			resultSet = statement.executeQuery();
+			while (resultSet.next()) {
+				statusCode = resultSet.getInt("ID");
+			}
+			System.out.println("Status - " + status + ", Status code - " + statusCode);
+		} catch (SQLException e) {
+			throw new CFAException(CFAConstants.ERROR_CODE_001, CFAConstants.E001_DB_FETCH_ERROR, e);
+		} finally {
+			closeResources(resultSet, statement);
+		}
+		return statusCode;
+	}
+
+	/**
+	 * This method makes an entry into the Status log table to track the request
+	 * 
+	 * @param con
+	 * @param requestBeansList
+	 * @throws CFAException
+	 */
+	private void createStatusLog(Connection con, List<UpdateRequestBean> reqList) throws CFAException {
+		String sql = "";
+		PreparedStatement stmt = null;
+		sql = CfaQueries.CREATE_STATUS_AUDIT_TRAIL;
+		try {
+			stmt = con.prepareStatement(sql);
+
+			for (UpdateRequestBean rBean : reqList) {
+				stmt.setLong(1, Long.parseLong(rBean.getRequestId()));
+				stmt.setInt(2, rBean.getStatusCode());
+				stmt.setString(3, "SAP");
+				stmt.addBatch();
+			}
+			stmt.executeBatch();
+		} catch (SQLException e) {
+			throw new CFAException(CFAConstants.ERROR_CODE_004, CFAConstants.E004_DB_UPDATE_ERROR, e);
+		} finally {
+			closeResources(null, stmt);
+		}
 	}
 }

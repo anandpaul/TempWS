@@ -10,7 +10,7 @@ import java.util.List;
  *
  */
 public class ApplicationConstants {
-	public static final String STATUS_ORDERED = "Ordered";
+
 	public static final String EMPTY_STRING = "";
 	public static final String CFA = "CFA";
 	public static final String PBI = "PBI";
@@ -19,17 +19,37 @@ public class ApplicationConstants {
 	public static final String NOMEX_LIME = "LIME";
 	public static final String ORDER_REQUESTS_ALL_QRY = "select * from ppcseSchema.T_ORDER_REQUEST where status in (?)";
 	public static final String FETCH_ORDER_ITEM_QRY = "select * from ppcseSchema.T_ORDER_ITEM where request_id =?";
-	public static final List<String> STYLABLE_GARMENTS = Collections
-			.unmodifiableList(new ArrayList<String>() {
+	public static final List<String> STYLABLE_GARMENTS = Collections.unmodifiableList(new ArrayList<String>() {
 
-				private static final long serialVersionUID = 1L;
+		private static final long serialVersionUID = 1L;
 
-				{
-					add("JACKET");
-					add("TROUSER");
-				}
-			});
+		{
+			add("JACKET");
+			add("TROUSER");
+		}
+	});
 	public static final String FETCH_SIZES_BY_GROUP_NAME = "select * from ppcseSchema.M_CATALOGUE_ITEMS where product_group = ? and description like ? and catalogue_id=(SELECT [catalogue_id] FROM [ppcseSchema].[M_CATALOGUES] where description = 'ACTIVE') order by material_id";
 
 	public static final String FETCH_MEASUREMENT_DATA = "select * from ppcseSchema.T_MEASUREMENT_REQUEST_ITEM where request_Id=?";
+
+	public static final String UPDATE_STATUS = "update ppcseSchema.T_ORDER_REQUEST set success=? where request_id in (%s)";
+	
+	/**
+	 * Application Status
+	 */
+	// CHANGE PPCSE0066 Add and modify the status names.
+	public static final String STATUS_DRAFT = "Draft";
+	public static final String STATUS_WAITING_ENDORSEMENT = "Waiting Endorsement";
+	public static final String STATUS_ENDORSED_PENDING_MEASUREMENT = "Endorsed, pending measurement";
+	public static final String STATUS_ENDORSED_MEASUREMENT_ONLY = "Endorsed for measurement only";
+	public static final String STATUS_MEASUREMENT_ONLY = "Measurement only";
+	public static final String STATUS_NOT_ENDORSED = "Not Endorsed";
+	public static final String STATUS_ENDORSED = "Endorsed";
+	public static final String STATUS_ALLOCATED = "Allocated";
+	public static final String STATUS_ORDERED = "Ordered";
+	public static final String STATUS_SENT_FOR_BADGING = "Sent off for bading";
+	public static final String STATUS_RECEIVED_BY_SLC_FOR_DISPATCH = "Rceived by SLC for dispatch";
+	public static final String STATUS_DISPATCHED = "Dispatched";
+	public static final String STATUS_EXPIRED = "Expired";
+	public static final String MODIFIED_STATUS="Order is being processed";
 }

@@ -20,6 +20,9 @@ public class RequestBean {
 	private Date orderedDate;
 	private BrigadeBean brigade;
 	private MeasurementRequestBean measurement;
+	private String priority;
+	private Date eta;
+	private int statusCode;
 
 	private List<ItemBean> itemBeanList;
 
@@ -261,6 +264,51 @@ public class RequestBean {
 	 */
 	public void setItemBeanList(List<ItemBean> itemBeanList) {
 		this.itemBeanList = itemBeanList;
+	}
+
+	/**
+	 * @return the priority
+	 */
+	public String getPriority() {
+		return priority;
+	}
+
+	/**
+	 * @param priority
+	 *            the priority to set
+	 */
+	public void setPriority(String priority) {
+		this.priority = priority;
+	}
+
+	/**
+	 * @return the eta
+	 */
+	public Date getEta() {
+		return eta;
+	}
+
+	/**
+	 * @param eta
+	 *            the eta to set
+	 */
+	public void setEta(Date eta) {
+		this.eta = eta;
+	}
+
+	/**
+	 * @return the statusCode
+	 */
+	public int getStatusCode() {
+		return statusCode;
+	}
+
+	/**
+	 * @param statusCode
+	 *            the statusCode to set
+	 */
+	public void setStatusCode(int statusCode) {
+		this.statusCode = statusCode;
 	}
 
 }

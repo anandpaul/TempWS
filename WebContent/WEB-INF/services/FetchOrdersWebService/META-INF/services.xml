@@ -1,10 +1,20 @@
-<service name="FetchOrdersWebService" >
+<service name="FetchOrdersWebService">
 	<Description>
 		Please Type your service description here
 	</Description>
 	<messageReceivers>
-		<messageReceiver mep="http://www.w3.org/2004/08/wsdl/in-only" class="org.apache.axis2.rpc.receivers.RPCInOnlyMessageReceiver" />
-		<messageReceiver  mep="http://www.w3.org/2004/08/wsdl/in-out"  class="org.apache.axis2.rpc.receivers.RPCMessageReceiver"/>
+		<messageReceiver mep="http://www.w3.org/2004/08/wsdl/in-only"
+			class="org.apache.axis2.rpc.receivers.RPCInOnlyMessageReceiver" />
+		<messageReceiver mep="http://www.w3.org/2004/08/wsdl/in-out"
+			class="org.apache.axis2.rpc.receivers.RPCMessageReceiver" />
 	</messageReceivers>
-	<parameter name="ServiceClass" locked="false">com.cfa.ppcse.ws.FetchOrdersWebService</parameter>
+	<!-- <parameter name="allowedMethods" value="*"/> -->
+	<parameter name="ServiceClass" locked="false">com.cfa.ppcse.ws.FetchOrdersWebService
+	</parameter>
+	<!-- <beanMapping languageSpecificType="java:com.cfa.ppcse.pojos.UpdateRequestBean"
+		qname="ns1:UpdateRequestBean" xmlns:ns1="urn:com.cfa.ppcse.pojos" /> -->
+	<!-- We need to define the Java object to let Axis understand the custome 
+		bean for serialization and deserialization -->
+	<!-- <beanMapping languageSpecificType="java:mypackage.Employee" qname="ns1:Employee" 
+		xmlns:ns1="urn:mypackage" /> -->
 </service>
