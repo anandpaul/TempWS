@@ -56,12 +56,12 @@ public class FetchOrdersWebService {
 	 * @throws CFAException
 	 * 
 	 */
-	@WebMethod
-	public static List<AllocatedAssetsBean> getAllocatedAssetsDetailsLogicData() throws CFAException {
-
-		List<AllocatedAssetsBean> assetsCreatedOrUpdatedTodayList = new ArrayList<AllocatedAssetsBean>();
-		FetchDataBusiness business = new FetchDataBusiness();
-		business.getAllocatedAssetsDetailsLogicData();
-		return assetsCreatedOrUpdatedTodayList;
-	}
+//	@WebMethod
+//	public static List<AllocatedAssetsBean> getAllocatedAssetsDetailsLogicData() throws CFAException {
+//
+//		List<AllocatedAssetsBean> assetsCreatedOrUpdatedTodayList = new ArrayList<AllocatedAssetsBean>();
+//		FetchDataBusiness business = new FetchDataBusiness();
+//		business.getAllocatedAssetsDetailsLogicData();
+//		return assetsCreatedOrUpdatedTodayList;
+//	}
 }

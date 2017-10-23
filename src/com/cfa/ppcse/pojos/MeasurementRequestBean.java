@@ -13,6 +13,7 @@ public class MeasurementRequestBean {
 	private Date updationDate;
 	private String style;
 	private String file;
+	private String comments;
 
 	/**
 	 * MTM details
@@ -356,6 +357,21 @@ public class MeasurementRequestBean {
 
 	public void setMeasurementId(String measurementId) {
 		this.measurementId = measurementId;
+	}
+
+	/**
+	 * @return the comments
+	 */
+	public String getComments() {
+		return comments;
+	}
+
+	/**
+	 * @param comments
+	 *            the comments to set
+	 */
+	public void setComments(String comments) {
+		this.comments = comments;
 	}
 
 }

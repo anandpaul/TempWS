@@ -23,6 +23,7 @@ public class RequestBean {
 	private String priority;
 	private Date eta;
 	private int statusCode;
+	private String approverComments;
 
 	private List<ItemBean> itemBeanList;
 
@@ -309,6 +310,21 @@ public class RequestBean {
 	 */
 	public void setStatusCode(int statusCode) {
 		this.statusCode = statusCode;
+	}
+
+	/**
+	 * @return the approverComments
+	 */
+	public String getApproverComments() {
+		return approverComments;
+	}
+
+	/**
+	 * @param approverComments
+	 *            the approverComments to set
+	 */
+	public void setApproverComments(String approverComments) {
+		this.approverComments = approverComments;
 	}
 
 }

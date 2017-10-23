@@ -45,7 +45,7 @@ public class FetchDataDAO extends BaseDAO {
 
 		List<RequestBean> ordersList = new ArrayList<RequestBean>();
 		ordersList.addAll(processResultSet(CfaQueries.FETCH_BRIGADE_APPROVED_REQUESTS));
-		ordersList.addAll(processResultSet(CfaQueries.FETCH_DISTRICT_ADDRESS_REQUESTS));
+//		ordersList.addAll(processResultSet(CfaQueries.FETCH_DISTRICT_ADDRESS_REQUESTS));
 		LOG.info("List of orders returned - "+ordersList.size());
 		return ordersList;
 	}
@@ -88,6 +88,7 @@ public class FetchDataDAO extends BaseDAO {
 				requestBean.setReason(rs.getString("reason"));
 				requestBean.setComment(rs.getString("comment"));
 				requestBean.setRoleType(rs.getString("role"));
+				requestBean.setApproverComments(rs.getString("approver_comments"));
 				System.out.println("rs.getDate(updation_date = " + rs.getString("updation_date") + ", eta - " + rs.getString("eta"));
 				 requestBean.setOrderedDate(rs.getDate("updation_date"));
 				requestBean.setPriority(rs.getString("priority"));
@@ -153,6 +154,7 @@ public class FetchDataDAO extends BaseDAO {
 					bean.setThigh_M(rs.getString("thigh_m"));
 				}
 				bean.setShOrderNo(rs.getString("Measurement_Form_No"));
+				bean.setComments(rs.getString("Comments"));
 			}
 		} catch (SQLException e) {
 			throw new CFAException(CFAConstants.ERROR_CODE_001, CFAConstants.E001_DB_FETCH_ERROR, e);
@@ -175,8 +177,9 @@ public class FetchDataDAO extends BaseDAO {
 		ResultSet resultSet = null;
 		List<ItemBean> itemBeanList = new ArrayList<ItemBean>();
 		try {
-			stmt = con.prepareStatement("select * from ppcseSchema.T_ORDER_ITEM where quantity>0 AND request_id =?");
+			stmt = con.prepareStatement(CfaQueries.FETCH_ORDER_ITEMS);
 			stmt.setString(1, request.getRequestId());
+			stmt.setBoolean(2, true);
 			ItemBean itemBean;
 			resultSet = stmt.executeQuery();
 			while (resultSet.next()) {
@@ -190,11 +193,12 @@ public class FetchDataDAO extends BaseDAO {
 				itemBean.setItemType(resultSet.getString("item_type"));
 				itemBean.setQuantity(Integer.valueOf(resultSet.getInt("quantity")));
 				String size = resultSet.getString("size");
+				itemBean.setVendorMaterialCode(resultSet.getString("vendor_material_code"));
 				if (null != size) {
 					if (size.endsWith("MTM")) {
 						mtmMaterial = true;
 					}
-					itemBean.setVendorMaterialCode(getMaterialCode(con, size, itemBean.getProductID()));
+//					itemBean.setVendorMaterialCode(getMaterialCode(con, size, itemBean.getProductID()));
 				}
 				if (newRecruit) {
 					if (!("SHORTS".equalsIgnoreCase(productId) || "KIT BAG".equalsIgnoreCase(productId))) {
@@ -229,7 +233,7 @@ public class FetchDataDAO extends BaseDAO {
 		ResultSet resultSet = null;
 		String vendorMaterialCode = null;
 		try {
-			stmt = con.prepareStatement("select vendor_material_code from ppcseSchema.M_CATALOGUE_ITEMS where material_id=? and product_group =?");
+			stmt = con.prepareStatement(CfaQueries.FETCH_VENDOR_MATERIAL_CODE);
 			stmt.setString(1, size);
 			stmt.setString(2, productID);
 			resultSet = stmt.executeQuery();
